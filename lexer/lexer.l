@@ -1,19 +1,32 @@
-/************************
- * scanner.l
- * @author mist
- * 2015-9-21 23:08
- ************************/
 %{
 #include "stdio.h"
 #include "stdlib.h"
-%}
 
-INT_DEX [1-9][0-9]*|[0]
-INT_HEX [0][Xx]([1-9][0-9]*|[0])
-INT_OCT [0][0-7]
-FLOAT [0-9]*[.][0-9]+([eE][+-]?[0-9]*|[0])?f?
-SEMI [;]
+%}
+/* -------------definition starting-------------*/
+/* ------- identifier ------- */
+ID [a-zA-Z_][a-zA-Z_0-9]*
+
+/* ------- keyword ------- */
+TYPE int|float
+STRUCT struct
+RETURN return
+IF if
+ELSE else 
+WHILE while
+BREAK break
+
+/* ------- separator ------- */
+SEMI_COLON [;]
 COMMA [,]
+LP \(
+RP \)
+LB \[
+RB \]
+LC \{
+RC \}
+
+/* ------- operator ------- */
 ASSIGNOP [=]
 RELOP [>]|[<]|[>][=]|[<][=]|[=][=]|[!][=](^[=])
 PLUS [+]
@@ -24,94 +37,84 @@ AND [&][&]
 OR [|][|]
 DOT [.]
 NOT [!]
-TYPE int|float
-LP \(
-RP \)
-LB \[
-RB \]
-LC \{
-RC \}
-STRUCT struct
-RETURN return
-IF if
-ELSE else 
-WHILE while
+
+/* ------- literal ------- */
+INT_DEX [1-9][0-9]*|[0]
+INT_HEX [0][Xx]([1-9][0-9]*|[0])
+INT_OCT [0][0-7]
+FLOAT [0-9]*[.][0-9]+([eE][+-]?[0-9]*|[0])?f?
+TRUE true
+
+/* ------- drop this part ------- */
 SPACE [ \n\t]
-ID [a-zA-Z_][a-zA-Z_0-9]*
-/*end of definition*/
+
+/* -------------definition ending-------------*/
 
 %%
-{SEMI} {
-    printf("get semmi : %s\n", yytext);
 
-}
-
-{COMMA} {
-    printf("get comma : %s\n", yytext);
-}
-{ASSIGNOP} {
-    printf("get assignop : %s\n", yytext);
-}
-
-{INT_DEX} |
-{INT_HEX} |
-{INT_OCT} {
-    printf("get an integer: %s\n", yytext);
-}
-
-{FLOAT} {
-    printf("get a float: %s\n", yytext);
-}
-
-{PLUS} | 
-{MINUS} |
-{DIV} |
-{STAR} {
-    printf("get an operator: %s\n", yytext);
-}
-
-{RELOP} {
-    printf("get a relop: %s\n", yytext);
-}
-
-{AND} |
-{OR} |
-{NOT} {
-    printf("get a logic operator: %s\n", yytext);
-}
-
-{DOT} {
-    printf("get a dot: %s\n", yytext);
-}
+{TYPE} |
 {STRUCT} |
 {RETURN} |
 {IF} |
 {ELSE} |
-{WHILE} {
-    printf("get keyword: %s\n", yytext);
+{WHILE} |
+{BREAK} {
+  /* ------- keyword ------- */
+    printf("<keyword, %s>\n", yytext);
 }
 
-{TYPE} {
-    printf("get type: %s\n", yytext);
-}
 
+
+{SEMI_COLON} |
+{COMMA} |
 {LP} |
 {RP} |
 {LB} |
 {RB} |
 {LC} |
 {RC} {
-    printf("get brackets : %s\n", yytext);
+  /* ------- separator ------- */
+    printf("<separator, %s>\n", yytext);
 }
 
-{SPACE} |
-. {
-/*ABANDON THESE CHARACTORS*/
+
+{ASSIGNOP} |
+{RELOP} |
+{PLUS} | 
+{MINUS} |
+{STAR} |
+{DIV} |
+{AND} |
+{OR} |
+{DOT} |
+{NOT} {
+  /* ------- operator ------- */
+    printf("<operator, %s>\n", yytext);
 }
+
+
+{INT_DEX} |
+{INT_HEX} |
+{INT_OCT} |
+{FLOAT} |
+{TRUE} {
+  /* ------- literal -------*/
+    printf("<literal, %s>\n", yytext);
+}
+
 
 {ID} {
-    printf("get an ID: %s\n", yytext);
+  /* ------- identifier ------- */
+    printf("<identifier, %s>\n", yytext);
 }
+
+
+
+{SPACE} {
+    /* ------- drop this part ------- */
+}
+
+
 %%
 int yywrap() {
   return 1;
@@ -124,6 +127,7 @@ int main(int argc, char** argv) {
            return 1;
        }
    }
+
    while (yylex());
    return 0;
  }
